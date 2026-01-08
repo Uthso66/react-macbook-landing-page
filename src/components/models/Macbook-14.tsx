@@ -11,6 +11,10 @@ Title: macbook pro M3 16 inch 2024
 import * as THREE from "three";
 import { useGLTF, useTexture } from "@react-three/drei";
 import type { GLTF } from "three-stdlib";
+import useMacbookStore from "../../store";
+import { useEffect } from "react";
+import { noChangeParts } from "../../constants";
+import { SRGBColorSpace } from "three";
 
 type GLTFResult = GLTF & {
   nodes: {
@@ -65,10 +69,29 @@ interface ModelProps {
 }
 
 export default function MacbookModel14(props: ModelProps) {
-  const { nodes, materials } = useGLTF(
+  const { color } = useMacbookStore();
+  const { nodes, materials, scene } = useGLTF(
     "/models/macbook-14-transformed.glb"
   ) as unknown as GLTFResult;
-  const texture = useTexture("/screen.png");
+  const texture = useTexture("/screen.png", (loadedTexture) => {
+    loadedTexture.colorSpace = SRGBColorSpace;
+    loadedTexture.needsUpdate = true;
+    return loadedTexture;
+  });
+
+  useEffect(() => {
+    scene.traverse((child: THREE.Object3D) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((child as any).isMesh) {
+        const meshChild = child as THREE.Mesh;
+        if (!noChangeParts.includes(meshChild.name)) {
+          // Use the original approach: create a new Color object
+          (meshChild.material as THREE.MeshStandardMaterial).color =
+            new THREE.Color(color);
+        }
+      }
+    });
+  }, [color, scene]);
   return (
     <group {...props} dispose={null}>
       <mesh

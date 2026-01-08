@@ -1,4 +1,4 @@
-import { navItems } from "../constants/index";
+import { navLinks } from "../constants/index";
 
 export default function NavBar() {
   return (
@@ -6,7 +6,7 @@ export default function NavBar() {
       <nav>
         <img src="/logo.svg" alt="Apple logo" />
         <ul>
-          {navItems.map((item) => (
+          {navLinks.map((item) => (
             <li key={item.label}>
               <a href={`/${item.label.toLowerCase()}`}>{item.label}</a>
             </li>
